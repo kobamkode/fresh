@@ -19,8 +19,25 @@ sudo dnf upgrade -y
 echo "==> installing packages"
 sudo dnf group install -y "Development Tools"
 sudo dnf install -y \
-    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit
-sudo dnf install -y nodejs22 nodejs22-npm
+    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide
+grep -q 'zoxide init' "$HOME/.bashrc" || \
+    echo 'eval "$(zoxide init bash --cmd cd)"' >> "$HOME/.bashrc"
+grep -q 'fzf/shell/key-bindings.bash' "$HOME/.bashrc" || \
+    echo '[ -f /usr/share/fzf/shell/key-bindings.bash ] && source /usr/share/fzf/shell/key-bindings.bash' >> "$HOME/.bashrc"
+grep -q 'alias wm=' "$HOME/.bashrc" || \
+    cat >> "$HOME/.bashrc" <<'EOF'
+alias wm="workmux"
+alias ll="ls -al --color=auto"
+alias tks="tmux kill-server"
+alias t="tmux"
+alias ta="tmux a"
+alias lg="lazygit"
+alias ld="lazydocker"
+alias update="sudo dnf -y update && flatpak -y update"
+export EDITOR=nvim
+EOF
+sudo dnf install -y nodejs22 nodejs22-npm || \
+    sudo dnf install -y nodejs npm
 sudo dnf install -y jetbrainsmono-nerd-font
 fc-cache -f
 # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
@@ -33,7 +50,8 @@ echo "==> docker"
     sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
 sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
+echo "==> adding $(id -un) to docker group"
+sudo usermod -aG docker "$(id -un)"
 
 echo "==> neovim config"
 [ -d "$HOME/.config/nvim" ] || \
@@ -41,6 +59,10 @@ echo "==> neovim config"
 
 echo "==> opencode"
 curl -fsSL https://opencode.ai/install | bash
+
+echo "==> workmux"
+[ -x "$HOME/.local/bin/workmux" ] || \
+    curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
 
 echo "==> opencode plugins"
 export PATH="$HOME/.opencode/bin:$PATH"
