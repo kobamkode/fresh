@@ -50,16 +50,21 @@ echo "==> docker"
     sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
 sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl enable --now docker
-echo "==> adding $(id -un) to docker group"
 sudo usermod -aG docker "$(id -un)"
 
 echo "==> neovim config"
-[ -d "$HOME/.config/nvim" ] || \
+if [ -d "$HOME/.config/nvim/.git" ]; then
+    git -C "$HOME/.config/nvim" pull --ff-only
+elif [ ! -d "$HOME/.config/nvim" ]; then
     git clone https://github.com/nvim-lua/kickstart.nvim.git "$HOME/.config/nvim"
+fi
 
 echo "==> rust"
-[ -x "$HOME/.cargo/bin/cargo" ] || \
+if [ -x "$HOME/.cargo/bin/cargo" ]; then
+    "$HOME/.cargo/bin/rustup" update || true
+else
     curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
+fi
 grep -q '.cargo/env' "$HOME/.bashrc" || \
     echo '. "$HOME/.cargo/env"' >> "$HOME/.bashrc"
 
@@ -95,4 +100,5 @@ echo "==> flatpak"
 sudo flatpak remote-add --if-not-exists flathub \
     https://flathub.org/repo/flathub.flatpakrepo
 
+echo "==> adding $(id -un) to docker group"
 echo "done. re-login for the docker group to take effect."
