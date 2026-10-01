@@ -52,6 +52,14 @@ sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$(id -un)"
 
+echo "==> stow dotfiles"
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ponytail: stow refuses to overwrite a real file, so drop any pre-existing
+# copy of a config we own before linking. Back these up yourself if you keep
+# local edits in $HOME.
+rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty"
+stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
+
 echo "==> neovim config"
 if [ -d "$HOME/.config/nvim/.git" ]; then
     git -C "$HOME/.config/nvim" pull --ff-only
