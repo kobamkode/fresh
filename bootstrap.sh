@@ -17,7 +17,7 @@ echo "==> upgrading system"
 sudo dnf upgrade -y
 
 echo "==> installing packages"
-sudo dnf group install -y "Development Tools"
+sudo dnf group install -y development-tools
 sudo dnf install -y \
     git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide
 grep -q 'zoxide init' "$HOME/.bashrc" || \
@@ -71,16 +71,19 @@ curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.
     | bash -s -- --only opencode --non-interactive
 
 echo "==> matt pocock skills (engineering + productivity)"
-npx skills add mattpocock/skills \
-    --skill ask-matt --skill grill-with-docs --skill triage \
-    --skill improve-codebase-architecture --skill setup-matt-pocock-skills \
-    --skill to-spec --skill to-tickets --skill implement --skill implement-spec \
-    --skill wayfinder --skill retro --skill prototype --skill diagnosing-bugs \
-    --skill research --skill tdd --skill domain-modeling --skill codebase-design \
-    --skill code-review --skill pr --skill wizard \
-    --skill grill-me --skill handoff --skill teach --skill to-questionnaire \
-    --skill wait-what --skill grilling --skill writing-for-agents \
-    -g -y
+# ponytail: the lock file is written per-skill, so a half-failed add can leave
+# gaps this guard skips. rm ~/.agents/.skill-lock.json to force a full re-add.
+[ -f "$HOME/.agents/.skill-lock.json" ] || \
+    npx skills add mattpocock/skills \
+        --skill ask-matt --skill grill-with-docs --skill triage \
+        --skill improve-codebase-architecture --skill setup-matt-pocock-skills \
+        --skill to-spec --skill to-tickets --skill implement --skill implement-spec \
+        --skill wayfinder --skill retro --skill prototype --skill diagnosing-bugs \
+        --skill research --skill tdd --skill domain-modeling --skill codebase-design \
+        --skill code-review --skill pr --skill wizard \
+        --skill grill-me --skill handoff --skill teach --skill to-questionnaire \
+        --skill wait-what --skill grilling --skill writing-for-agents \
+        -g -y
 
 echo "==> flatpak"
 sudo flatpak remote-add --if-not-exists flathub \
