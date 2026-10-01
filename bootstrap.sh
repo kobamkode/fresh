@@ -107,7 +107,7 @@ echo "==> matt pocock skills (engineering + productivity)"
 echo "==> flatpak"
 sudo flatpak remote-add --if-not-exists flathub \
     https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y --noninteractive --or-update flathub io.github.CyberTimon.RapidRAW
+flatpak install -y --noninteractive --or-update flathub io.github.CyberTimon.RapidRAW md.obsidian.Obsidian
 
 echo "==> adding $(id -un) to docker group"
 echo "done. re-login for the docker group to take effect."
