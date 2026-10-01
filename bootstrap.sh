@@ -41,9 +41,16 @@ sudo dnf install -y nodejs22 nodejs22-npm || \
 sudo dnf install -y jetbrainsmono-nerd-font
 fc-cache -f
 # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
-# updates it — re-running bootstrap is the update path. Fix this URL if
-# DBeaver renames the `-latest-` file scheme on their CDN.
-sudo dnf install -y https://dbeaver.io/files/dbeaver-ce-latest-linux-x86_64.rpm
+# updates it — re-running bootstrap is the update path. Compare the CDN's
+# `-latest-` redirect version against the installed one so a current install
+# skips the full RPM download. Fix this URL if DBeaver renames the file scheme.
+DBEAVER_URL=https://dbeaver.io/files/dbeaver-ce-latest-linux-x86_64.rpm
+dbeaver_latest=$(curl -fsSI "$DBEAVER_URL" \
+    | sed -n 's#^[Ll]ocation:.*/dbeaver-ce-\([0-9][^/]*\)-linux.*#\1#p' | tr -d '\r')
+dbeaver_current=$(rpm -q --qf '%{VERSION}' dbeaver-ce 2>/dev/null || true)
+if [ "$dbeaver_latest" != "$dbeaver_current" ]; then
+    sudo dnf install -y "$DBEAVER_URL"
+fi
 
 echo "==> docker"
 [ -f /etc/yum.repos.d/docker-ce.repo ] || \
