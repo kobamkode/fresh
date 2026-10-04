@@ -19,7 +19,7 @@ sudo dnf upgrade -y
 echo "==> installing packages"
 sudo dnf group install -y development-tools
 sudo dnf install -y \
-    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow
+    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow golang
 grep -q 'zoxide init' "$HOME/.bashrc" || \
     echo 'eval "$(zoxide init bash --cmd cd)"' >> "$HOME/.bashrc"
 grep -q 'fzf/shell/key-bindings.bash' "$HOME/.bashrc" || \
@@ -35,6 +35,7 @@ alias lg="lazygit"
 alias ld="lazydocker"
 alias update="sudo dnf -y update && flatpak -y update"
 export EDITOR=nvim
+export PATH="$HOME/go/bin:$PATH"
 EOF
 sudo dnf install -y nodejs22 nodejs22-npm || \
     sudo dnf install -y nodejs npm
