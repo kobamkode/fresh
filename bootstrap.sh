@@ -89,6 +89,12 @@ if [ -x "$HOME/.bun/bin/bun" ]; then
 else
     curl -fsSL https://bun.sh/install | bash
 fi
+grep -q 'BUN_INSTALL' "$HOME/.bashrc" || cat >> "$HOME/.bashrc" <<'EOF'
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+EOF
 
 echo "==> opencode"
 curl -fsSL https://opencode.ai/install | bash
