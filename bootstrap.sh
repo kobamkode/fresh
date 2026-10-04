@@ -83,6 +83,13 @@ fi
 grep -q '.cargo/env' "$HOME/.bashrc" || \
     echo '. "$HOME/.cargo/env"' >> "$HOME/.bashrc"
 
+echo "==> bun"
+if [ -x "$HOME/.bun/bin/bun" ]; then
+    "$HOME/.bun/bin/bun" upgrade || true
+else
+    curl -fsSL https://bun.sh/install | bash
+fi
+
 echo "==> opencode"
 curl -fsSL https://opencode.ai/install | bash
 
