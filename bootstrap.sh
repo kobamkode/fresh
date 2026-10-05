@@ -19,7 +19,7 @@ sudo dnf upgrade -y
 echo "==> installing packages"
 sudo dnf group install -y development-tools
 sudo dnf install -y \
-    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow golang
+    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow golang hugo
 grep -q 'zoxide init' "$HOME/.bashrc" || \
     echo 'eval "$(zoxide init bash --cmd cd)"' >> "$HOME/.bashrc"
 grep -q 'fzf/shell/key-bindings.bash' "$HOME/.bashrc" || \
