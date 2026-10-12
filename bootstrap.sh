@@ -70,7 +70,10 @@ stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
 
 echo "==> neovim config"
 if [ -d "$HOME/.config/nvim/.git" ]; then
-    git -C "$HOME/.config/nvim" pull --ff-only
+    git -C "$HOME/.config/nvim" pull --rebase --autostash || {
+        echo "warning: nvim config diverged, skipped update" >&2
+        git -C "$HOME/.config/nvim" rebase --abort 2>/dev/null || true
+    }
 elif [ ! -d "$HOME/.config/nvim" ]; then
     git clone https://github.com/nvim-lua/kickstart.nvim.git "$HOME/.config/nvim"
 fi
@@ -97,8 +100,8 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 EOF
 
-echo "==> opencode"
-curl -fsSL https://opencode.ai/install | bash
+echo "==> opencode v2"
+curl -fsSL https://opencode.ai/v2/install | bash
 
 echo "==> workmux"
 [ -x "$HOME/.local/bin/workmux" ] || \
@@ -106,9 +109,13 @@ echo "==> workmux"
 
 echo "==> opencode plugins"
 export PATH="$HOME/.opencode/bin:$PATH"
-opencode plugin -g @dietrichgebert/ponytail
-curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh \
-    | bash -s -- --only opencode --non-interactive
+# V2: opencode plugin add installs into the global config; skip when the
+# entry already exists so a re-run does not duplicate it.
+grep -q '@dietrichgebert/ponytail' "$HOME/.config/opencode/opencode.json" 2>/dev/null || \
+    opencode plugin add @dietrichgebert/ponytail
+# The upstream caveman installer ships the V1 plugin API and would clobber
+# the V2 port living in ~/.config/opencode/plugins/caveman. Upstream has no
+# V2 entrypoint yet; install/refresh the port there manually.
 
 echo "==> matt pocock skills (engineering + productivity)"
 # ponytail: the lock file is written per-skill, so a half-failed add can leave
