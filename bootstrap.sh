@@ -113,9 +113,10 @@ export PATH="$HOME/.opencode/bin:$PATH"
 # entry already exists so a re-run does not duplicate it.
 grep -q '@dietrichgebert/ponytail' "$HOME/.config/opencode/opencode.json" 2>/dev/null || \
     opencode plugin add @dietrichgebert/ponytail
-# The upstream caveman installer ships the V1 plugin API and would clobber
-# the V2 port living in ~/.config/opencode/plugins/caveman. Upstream has no
-# V2 entrypoint yet; install/refresh the port there manually.
+# caveman: upstream still ships the V1 plugin API, which does not run on
+# OpenCode V2 (see https://opencode.ai/v2/docs/build/plugins/migrate-v1).
+# The config entry is removed until upstream ships a V2 entrypoint
+# ({ id, setup }) in src/plugins/opencode/. Re-add "./plugins/caveman" then.
 
 echo "==> matt pocock skills (engineering + productivity)"
 # ponytail: the lock file is written per-skill, so a half-failed add can leave

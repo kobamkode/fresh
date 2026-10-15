@@ -3,9 +3,7 @@
   "model": "opencode-go/mimo-v2.6-flash",
   "default_agent": "plan",
   "plugins": [
-    "@dietrichgebert/ponytail",
-    "./plugins/caveman",
-    "./plugins/opencode-telegram"
+    "@dietrichgebert/ponytail"
   ],
   "agents": {
     "plan": {
