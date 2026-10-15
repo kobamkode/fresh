@@ -42,7 +42,9 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker "$(id -un)"
 
 echo "==> fish"
-sudo chsh -s "$(command -v fish)" "$(id -un)"
+# skip when already the login shell: touching /etc/passwd again is pointless
+[ "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v fish)" ] || \
+    sudo chsh -s "$(command -v fish)" "$(id -un)"
 
 echo "==> stow dotfiles"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,8 +53,9 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # local edits in $HOME.
 rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
     "$HOME/.config/fish/config.fish" "$HOME/.config/opencode/opencode.json"
-# workmux dir is managed as a whole; a real copy blocks the stow links.
-rm -rf "$HOME/.config/workmux"
+# workmux: remove only the paths stow links so a rerun does not nuke any
+# real state the user (or workmux) keeps under ~/.config/workmux.
+rm -rf "$HOME/.config/workmux/config.yaml" "$HOME/.config/workmux/agents/opencode-build"
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
 
 echo "==> neovim config"
@@ -95,15 +98,21 @@ echo "==> workmux"
 [ -x "$HOME/.local/bin/workmux" ] || \
     curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
 
+echo "==> beads (bd)"
+# official installer: verifies release checksum, installs to ~/.local/bin
+[ -x "$HOME/.local/bin/bd" ] || \
+    curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
+
 echo "==> opencode plugins"
 export PATH="$HOME/.opencode/bin:$PATH"
 # V2: opencode plugin add installs into the global config; skip when the
 # entry already exists so a re-run does not duplicate it.
 grep -q '@dietrichgebert/ponytail' "$HOME/.config/opencode/opencode.json" 2>/dev/null || \
     opencode plugin add @dietrichgebert/ponytail
-# The upstream caveman installer ships the V1 plugin API and would clobber
-# the V2 port living in ~/.config/opencode/plugins/caveman. Upstream has no
-# V2 entrypoint yet; install/refresh the port there manually.
+# caveman: upstream still ships the V1 plugin API, which does not run on
+# OpenCode V2 (see https://opencode.ai/v2/docs/build/plugins/migrate-v1).
+# The config entry is removed until upstream ships a V2 entrypoint
+# ({ id, setup }) in src/plugins/opencode/. Re-add "./plugins/caveman" then.
 
 echo "==> matt pocock skills (engineering + productivity)"
 # ponytail: the lock file is written per-skill, so a half-failed add can leave
