@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# workmux injects the prompt as `--prompt <text>`; opencode run takes it positionally.
+args=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --prompt) shift; args+=("$1"); shift ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+exec opencode run --standalone --agent build --model opencode-go/mimo-v2.6-flash --auto "${args[@]}"

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/mimo-v2.6-flash",
+  "default_agent": "plan",
+  "plugins": [
+    "@dietrichgebert/ponytail",
+    "./plugins/caveman",
+    "./plugins/opencode-telegram"
+  ],
+  "agents": {
+    "plan": {
+      "model": "opencode-go/mimo-v2.6-pro"
+    },
+    "build": {
+      "model": "opencode-go/mimo-v2.6-flash"
+    }
+  },
+  "permissions": [
+    { "action": "external_directory", "resource": "~/dev/*", "effect": "allow" },
+    { "action": "external_directory", "resource": "~/.config/workmux/*", "effect": "allow" },
+    { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" }
+  ]
+}

@@ -10,6 +10,9 @@ test -f /usr/share/fzf/shell/key-bindings.fish; and source /usr/share/fzf/shell/
 
 set -gx EDITOR nvim
 
+# capture: requires CAPTURE_VAULT (vault root); optional CAPTURE_DAILY_DIR, CAPTURE_DAILY_FORMAT
+# set -gx CAPTURE_VAULT /path/to/vault
+
 alias wm="workmux"
 alias ll="ls -al --color=auto"
 alias tks="tmux kill-server"

@@ -50,7 +50,9 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # copy of a config we own before linking. Back these up yourself if you keep
 # local edits in $HOME.
 rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
-    "$HOME/.config/fish/config.fish"
+    "$HOME/.config/fish/config.fish" "$HOME/.config/opencode/opencode.json"
+# workmux dir is managed as a whole; a real copy blocks the stow links.
+rm -rf "$HOME/.config/workmux"
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
 
 echo "==> neovim config"
@@ -71,6 +73,9 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 # node pinned at 22 to match the old nodejs22 package; the rest float.
 mise use --global node@22 go hugo-extended bun rust
 mise upgrade
+
+echo "==> capture"
+go install github.com/kobamkode/capture@latest
 
 echo "==> opencode v2"
 # ponytail: the upstream installer always re-downloads and rewrites the
