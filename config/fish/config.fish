@@ -14,7 +14,6 @@ set -gx EDITOR nvim
 set -gx CAPTURE_VAULT $HOME/dev/journal
 set -gx CAPTURE_DAILY_DIR daily
 
-alias wm="workmux"
 alias ll="ls -al --color=auto"
 alias tks="tmux kill-server"
 alias t="tmux"

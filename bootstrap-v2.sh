@@ -53,9 +53,6 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # local edits in $HOME.
 rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
     "$HOME/.config/fish/config.fish" "$HOME/.config/opencode/opencode.json"
-# workmux: remove only the paths stow links so a rerun does not nuke any
-# real state the user (or workmux) keeps under ~/.config/workmux.
-rm -rf "$HOME/.config/workmux/config.yaml" "$HOME/.config/workmux/agents/opencode-build"
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
 
 echo "==> neovim config"
@@ -93,10 +90,6 @@ if [ "$oc_latest" != "$oc_current" ]; then
     # --no-modify-path: fish PATH lives in the stowed config.fish.
     curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
 fi
-
-echo "==> workmux"
-[ -x "$HOME/.local/bin/workmux" ] || \
-    curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
 
 echo "==> beads (bd)"
 # official installer: verifies release checksum, installs to ~/.local/bin

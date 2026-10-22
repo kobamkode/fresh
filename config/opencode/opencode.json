@@ -15,7 +15,6 @@
   },
   "permissions": [
     { "action": "external_directory", "resource": "~/dev/*", "effect": "allow" },
-    { "action": "external_directory", "resource": "~/.config/workmux/*", "effect": "allow" },
     { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" }
   ]
 }

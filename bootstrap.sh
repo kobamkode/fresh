@@ -24,9 +24,8 @@ grep -q 'zoxide init' "$HOME/.bashrc" || \
     echo 'eval "$(zoxide init bash --cmd cd)"' >> "$HOME/.bashrc"
 grep -q 'fzf/shell/key-bindings.bash' "$HOME/.bashrc" || \
     echo '[ -f /usr/share/fzf/shell/key-bindings.bash ] && source /usr/share/fzf/shell/key-bindings.bash' >> "$HOME/.bashrc"
-grep -q 'alias wm=' "$HOME/.bashrc" || \
+grep -q 'alias ll=' "$HOME/.bashrc" || \
     cat >> "$HOME/.bashrc" <<'EOF'
-alias wm="workmux"
 alias ll="ls -al --color=auto"
 alias tks="tmux kill-server"
 alias t="tmux"
@@ -102,10 +101,6 @@ EOF
 
 echo "==> opencode v2"
 curl -fsSL https://opencode.ai/v2/install | bash
-
-echo "==> workmux"
-[ -x "$HOME/.local/bin/workmux" ] || \
-    curl -fsSL https://raw.githubusercontent.com/raine/workmux/main/scripts/install.sh | bash
 
 echo "==> opencode plugins"
 export PATH="$HOME/.opencode/bin:$PATH"

@@ -1,6 +1,0 @@
-agent: /home/mario/.config/workmux/agents/opencode-build
-
-panes:
-  - command: <agent>
-    focus: true
-  - split: horizontal
