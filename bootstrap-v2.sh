@@ -19,7 +19,7 @@ sudo dnf upgrade -y
 echo "==> installing packages"
 sudo dnf group install -y development-tools
 sudo dnf install -y \
-    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow fish
+    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit zoxide stow fish glances
 sudo dnf install -y jetbrainsmono-nerd-font
 fc-cache -f
 # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
@@ -42,6 +42,8 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker "$(id -un)"
 
 echo "==> fish"
+# no startup greeting; universal so it sticks even without the stowed config
+fish -c 'set -U fish_greeting'
 # skip when already the login shell: touching /etc/passwd again is pointless
 [ "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v fish)" ] || \
     sudo chsh -s "$(command -v fish)" "$(id -un)"

@@ -1,3 +1,6 @@
+# no startup greeting
+set -g fish_greeting
+
 # paths
 fish_add_path $HOME/.local/bin
 fish_add_path $HOME/.opencode/bin
@@ -13,6 +16,7 @@ set -gx EDITOR nvim
 # capture: requires CAPTURE_VAULT (vault root); optional CAPTURE_DAILY_DIR, CAPTURE_DAILY_FORMAT
 set -gx CAPTURE_VAULT $HOME/dev/journal
 set -gx CAPTURE_DAILY_DIR daily
+alias c="capture"
 
 alias ll="ls -al --color=auto"
 alias tks="tmux kill-server"
