@@ -25,3 +25,8 @@ alias ta="tmux a"
 alias lg="lazygit"
 alias ld="lazydocker"
 alias update="sudo dnf -y update && flatpak -y update"
+
+# auto-attach tmux in interactive shells, unless already inside it
+if status is-interactive; and not set -q TMUX; and command -q tmux
+    exec tmux new-session -A -s main
+end

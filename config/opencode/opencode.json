@@ -7,10 +7,19 @@
   ],
   "agents": {
     "plan": {
-      "model": "opencode-go/mimo-v2.6-pro"
+      "model": "opencode-go/deepseek-v4.1-flash"
     },
     "build": {
-      "model": "opencode-go/mimo-v2.6-flash"
+      "model": "opencode-go/deepseek-v4.1-flash"
+    }
+  },
+  "mcp": {
+    "servers": {
+      "sentry": {
+        "type": "remote",
+        "url": "https://mcp.sentry.dev/mcp",
+        "enabled": true
+      }
     }
   },
   "permissions": [
