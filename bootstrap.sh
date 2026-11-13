@@ -10,7 +10,6 @@ sudo -v
 
 echo "==> enabling copr repos"
 sudo dnf copr enable -y scottames/ghostty
-sudo dnf copr enable -y dejan/lazygit
 sudo dnf copr enable -y komapro/nerd-fonts
 
 echo "==> upgrading system"
@@ -19,25 +18,7 @@ sudo dnf upgrade -y
 echo "==> installing packages"
 sudo dnf group install -y development-tools
 sudo dnf install -y \
-    git gh neovim tmux ripgrep fd-find fzf ghostty lazygit git-delta zoxide stow golang hugo
-grep -q 'zoxide init' "$HOME/.bashrc" || \
-    echo 'eval "$(zoxide init bash --cmd cd)"' >> "$HOME/.bashrc"
-grep -q 'fzf/shell/key-bindings.bash' "$HOME/.bashrc" || \
-    echo '[ -f /usr/share/fzf/shell/key-bindings.bash ] && source /usr/share/fzf/shell/key-bindings.bash' >> "$HOME/.bashrc"
-grep -q 'alias ll=' "$HOME/.bashrc" || \
-    cat >> "$HOME/.bashrc" <<'EOF'
-alias ll="ls -al --color=auto"
-alias tks="tmux kill-server"
-alias t="tmux"
-alias ta="tmux a"
-alias lg="lazygit"
-alias ld="lazydocker"
-alias update="sudo dnf -y update && flatpak -y update"
-export EDITOR=nvim
-export PATH="$HOME/go/bin:$PATH"
-EOF
-sudo dnf install -y nodejs22 nodejs22-npm || \
-    sudo dnf install -y nodejs npm
+    git gh neovim tmux ripgrep fd-find fzf bash-completion ghostty git-delta zoxide stow glances
 sudo dnf install -y jetbrainsmono-nerd-font
 fc-cache -f
 # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
@@ -59,13 +40,19 @@ sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$(id -un)"
 
+echo "==> login shell"
+[ "$(basename "$(getent passwd "$(id -un)" | cut -d: -f7)")" = bash ] || \
+    sudo chsh -s "$(command -v bash)" "$(id -un)"
+
 echo "==> stow dotfiles"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ponytail: stow refuses to overwrite a real file, so drop any pre-existing
 # copy of a config we own before linking. Back these up yourself if you keep
 # local edits in $HOME.
-rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty"
+rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
+    "$HOME/.config/opencode/opencode.json"
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
+stow --no-folding -d "$DOTFILES_DIR" -t "$HOME" bash
 
 echo "==> neovim config"
 if [ -d "$HOME/.config/nvim/.git" ]; then
@@ -77,30 +64,36 @@ elif [ ! -d "$HOME/.config/nvim" ]; then
     git clone https://github.com/nvim-lua/kickstart.nvim.git "$HOME/.config/nvim"
 fi
 
-echo "==> rust"
-if [ -x "$HOME/.cargo/bin/cargo" ]; then
-    "$HOME/.cargo/bin/rustup" update || true
-else
-    curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
-fi
-grep -q '.cargo/env' "$HOME/.bashrc" || \
-    echo '. "$HOME/.cargo/env"' >> "$HOME/.bashrc"
+echo "==> dev tools (mise)"
+# ponytail: mise.run is upstream's recommended Linux install and keeps the
+# binary when it is the same release or newer, so re-runs are a no-op.
+curl -fsSL https://mise.run | sh
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+# node pinned at 22 to match the old nodejs22 package; the rest float.
+mise use --global node@22 go hugo-extended bun rust starship@latest lazygit lazydocker
+mise upgrade
 
-echo "==> bun"
-if [ -x "$HOME/.bun/bin/bun" ]; then
-    "$HOME/.bun/bin/bun" upgrade || true
-else
-    curl -fsSL https://bun.sh/install | bash
-fi
-grep -q 'BUN_INSTALL' "$HOME/.bashrc" || cat >> "$HOME/.bashrc" <<'EOF'
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-EOF
+echo "==> capture"
+go install github.com/kobamkode/capture@latest
 
 echo "==> opencode v2"
-curl -fsSL https://opencode.ai/v2/install | bash
+# ponytail: the upstream installer always re-downloads and rewrites the
+# binary, so compare versions first and only install when missing or stale.
+# Re-running bootstrap is the update path.
+oc_latest=$(curl -fsSL https://opencode.ai/update/api/latest/cli/npm \
+    | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' | tr -d '\r')
+oc_current=$("$HOME/.opencode/bin/opencode" --version 2>/dev/null || true)
+oc_current="${oc_current##* }"
+oc_current="${oc_current#v}"
+if [ "$oc_latest" != "$oc_current" ]; then
+    # --no-modify-path: PATH lives in the stowed ~/.bashrc.d.
+    curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
+fi
+
+echo "==> beads (bd)"
+# official installer: verifies release checksum, installs to ~/.local/bin
+[ -x "$HOME/.local/bin/bd" ] || \
+    curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
 
 echo "==> opencode plugins"
 export PATH="$HOME/.opencode/bin:$PATH"
@@ -134,4 +127,4 @@ sudo flatpak remote-add --if-not-exists flathub \
 flatpak install -y --noninteractive --or-update flathub io.github.CyberTimon.RapidRAW md.obsidian.Obsidian
 
 echo "==> adding $(id -un) to docker group"
-echo "done. re-login for the docker group to take effect."
+echo "done. re-login for bash and the docker group to take effect."
