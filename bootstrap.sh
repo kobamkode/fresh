@@ -51,6 +51,18 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # local edits in $HOME.
 rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
     "$HOME/.config/opencode/opencode.json"
+# COSMIC keeps one small file per setting; these directories are tracked
+# whole, so replacing them is safe.
+rm -rf "$HOME/.config/cosmic/com.system76.CosmicComp/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicSettings.Shortcuts/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicAppletTime/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicIdle/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicPanel/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicPanel.Panel/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicPanel.Dock/v1" \
+    "$HOME/.config/cosmic/com.system76.CosmicTheme.Dark/v2" \
+    "$HOME/.config/cosmic/com.system76.CosmicTheme.Light/v2"
+rm -f "$HOME/.config/cosmic/com.system76.CosmicBackground/v1/all"
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
 stow --no-folding -d "$DOTFILES_DIR" -t "$HOME" bash
 
@@ -73,6 +85,17 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 mise use --global node@22 go hugo-extended bun rust starship@latest lazygit lazydocker
 mise upgrade
 
+echo "==> devvm"
+# devvm upgrade is the supported update path and no-ops when current; the
+# installer only runs on a machine where devvm is missing. --yes agrees to
+# the Lima, QEMU and /dev/kvm setup its doctor asks for.
+if command -v devvm >/dev/null 2>&1; then
+    devvm upgrade --force
+else
+    curl -fsSL https://github.com/devvmhq/devvm/releases/latest/download/install.sh \
+        | bash -s -- --yes
+fi
+
 echo "==> capture"
 go install github.com/kobamkode/capture@latest
 
@@ -88,6 +111,15 @@ oc_current="${oc_current#v}"
 if [ "$oc_latest" != "$oc_current" ]; then
     # --no-modify-path: PATH lives in the stowed ~/.bashrc.d.
     curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
+fi
+
+echo "==> pi"
+# pi update is the supported update path and no-ops when current; the
+# installer only runs on a machine where pi is missing.
+if command -v pi >/dev/null 2>&1; then
+    pi update --no-approve
+else
+    curl -fsSL https://pi.dev/install.sh | sh
 fi
 
 echo "==> beads (bd)"
