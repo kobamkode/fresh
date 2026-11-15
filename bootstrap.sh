@@ -73,8 +73,10 @@ if [ -d "$HOME/.config/nvim/.git" ]; then
         git -C "$HOME/.config/nvim" rebase --abort 2>/dev/null || true
     }
 elif [ ! -d "$HOME/.config/nvim" ]; then
-    git clone https://github.com/nvim-lua/kickstart.nvim.git "$HOME/.config/nvim"
+    git clone https://github.com/kobamkode/kickstart.nvim.git "$HOME/.config/nvim"
 fi
+echo "==> installing neovim plugins"
+nvim --headless '+qa'
 
 echo "==> dev tools (mise)"
 # ponytail: mise.run is upstream's recommended Linux install and keeps the
@@ -84,17 +86,6 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 # node pinned at 22 to match the old nodejs22 package; the rest float.
 mise use --global node@22 go hugo-extended bun rust starship@latest lazygit lazydocker
 mise upgrade
-
-echo "==> devvm"
-# devvm upgrade is the supported update path and no-ops when current; the
-# installer only runs on a machine where devvm is missing. --yes agrees to
-# the Lima, QEMU and /dev/kvm setup its doctor asks for.
-if command -v devvm >/dev/null 2>&1; then
-    devvm upgrade --force
-else
-    curl -fsSL https://github.com/devvmhq/devvm/releases/latest/download/install.sh \
-        | bash -s -- --yes
-fi
 
 echo "==> capture"
 go install github.com/kobamkode/capture@latest
@@ -115,11 +106,15 @@ fi
 
 echo "==> pi"
 # pi update is the supported update path and no-ops when current; the
-# installer only runs on a machine where pi is missing.
+# installer only runs on a machine where pi is missing. The installer has no
+# --yes flag and reads its action menu and "Start pi now?" prompt straight
+# from /dev/tty, so run it under setsid: stdin is the curl pipe and the new
+# session has no controlling terminal, which makes it take the unattended
+# defaults (its node/npm prompt is moot because mise installed node above).
 if command -v pi >/dev/null 2>&1; then
     pi update --no-approve
 else
-    curl -fsSL https://pi.dev/install.sh | sh
+    curl -fsSL https://pi.dev/install.sh | setsid sh
 fi
 
 echo "==> beads (bd)"

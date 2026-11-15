@@ -5,8 +5,12 @@ alias ta="tmux a"
 alias lg="lazygit"
 alias ld="lazydocker"
 alias c="capture"
+alias ct="capture -t"
 alias cl="capture -l"
 alias clw="capture -l -w"
+
+# ledger lives in the finsux repo; pin it so `add` never creates ~/journal again
+alias finsux="finsux -f $HOME/dev/finsux/journal"
 
 update() { sudo dnf -y upgrade && flatpak -y update; }
 
