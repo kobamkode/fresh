@@ -87,6 +87,18 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 mise use --global node@22 go hugo-extended bun rust starship@latest lazygit lazydocker
 mise upgrade
 
+echo "==> depsguard"
+# Fedora has no package and the TUI cannot be scripted, so this only installs
+# the binary; run `depsguard` to apply fixes. crates.io is the update path, so
+# rebuild only when a newer version is published. The URL is the sparse index
+# layout: first two and next two characters of the crate name.
+dg_latest=$(curl -fsSL https://index.crates.io/de/ps/depsguard \
+    | sed -n 's/.*"vers":"\([^"]*\)".*/\1/p' | tail -1)
+dg_current=$("$HOME/.cargo/bin/depsguard" --version 2>/dev/null | awk '{print $2}')
+if [ -z "$dg_current" ] || [ "$dg_latest" != "$dg_current" ]; then
+    cargo install --locked depsguard
+fi
+
 echo "==> capture"
 go install github.com/kobamkode/capture@latest
 
