@@ -20,10 +20,42 @@
         "url": "https://mcp.sentry.dev/mcp",
         "enabled": true
       }
+    },
+    "caveman": {
+      "type": "local",
+      "command": [
+        "/home/mario/.caveman/bin/caveman-mcp"
+      ],
+      "enabled": true
     }
   },
   "permissions": [
-    { "action": "external_directory", "resource": "~/dev/*", "effect": "allow" },
-    { "action": "external_directory", "resource": "/tmp/**", "effect": "allow" }
-  ]
+    {
+      "action": "external_directory",
+      "resource": "~/dev/*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/tmp/**",
+      "effect": "allow"
+    }
+  ],
+  "provider": {
+    "openai": {
+      "options": {
+        "baseURL": "http://127.0.0.1:8787/w/opencode/openai/v1"
+      }
+    },
+    "anthropic": {
+      "options": {
+        "baseURL": "http://127.0.0.1:8787/w/opencode/anthropic/v1"
+      }
+    },
+    "opencode-go": {
+      "options": {
+        "baseURL": "http://127.0.0.1:8787/w/opencode/compat/opencode-go/v1"
+      }
+    }
+  }
 }
