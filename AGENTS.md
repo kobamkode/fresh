@@ -12,9 +12,10 @@ Fedora-only (dnf, copr, flatpak); no other distro is supported or tested.
 ```
 
 Sections: `packages` (dnf/copr/flatpak, docker, tailscale, login shell),
-`dotfiles` (stow, nvim), `tools` (mise, depsguard, capture, summarize), `agents`
-(pi, ponytail, caveman, beads, skills). A section assumes the earlier ones ran
-on this machine at least once — `agents` needs the node that `tools` installs.
+`dotfiles` (git identity, stow, nvim), `tools` (mise, depsguard, capture,
+summarize), `agents` (pi, ponytail, caveman, beads, skills). A section assumes
+the earlier ones ran on this machine at least once — `agents` needs the node
+that `tools` installs.
 
 Check shell edits before running anything:
 
@@ -45,8 +46,10 @@ bash -n bootstrap.sh bash/.bashrc.d/*.sh
   The rest of `CosmicTheme.*/v2` is recomputed by COSMIC from `accent`, so
   snapshotting it only adds ~40 files of churn and values that go stale when
   COSMIC changes its derivation.
-- **Nothing identity- or secret-shaped gets tracked** (`.gitconfig`, `.ssh`,
-  API keys); `$HOME` config is the machine's, not the repo's.
+- **Secrets never get tracked**, and `$HOME` config is the machine's, not the
+  repo's: `.ssh`, API keys and `.gitconfig` stay out. The one identity exception
+  is the seed-only `user.name`/`user.email` in `bootstrap.sh` — it never
+  overwrites an existing identity, and those values are in every commit anyway.
 
 ## Layout
 

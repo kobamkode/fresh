@@ -79,6 +79,15 @@ packages() {
 }
 
 dotfiles() {
+    echo "==> git identity"
+    # ponytail: seed only, never override. A repo or machine that already answers
+    # for itself keeps its identity, and per-repo user.* still outranks these
+    # globals. The literals live here because a fresh box cannot commit until an
+    # identity exists and bootstrap never prompts; they are the same two values
+    # every commit in this repo already carries.
+    git config --global user.name >/dev/null || git config --global user.name "Mario Wibisono"
+    git config --global user.email >/dev/null || git config --global user.email "kobamkode@gmail.com"
+
     echo "==> stow dotfiles"
     # ponytail: stow refuses to overwrite a real file, so drop every path this repo
     # tracks before linking. Deriving the list from git keeps it from drifting as
