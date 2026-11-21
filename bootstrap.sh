@@ -192,6 +192,13 @@ agents() {
         --skill grill-me --skill handoff --skill teach --skill to-questionnaire \
         --skill wait-what --skill grilling --skill writing-for-agents \
         -g -a pi -y
+
+    echo "==> josjis skill (grill-to-PR chain)"
+    # ponytail: josjis only chains the matt pocock skills above, so it installs
+    # after them and adds no dependency of its own. Same idempotent `add` path.
+    npx -y skills@latest add kobamkode/kobamkode-skill \
+        --skill josjis \
+        -g -a pi -y
 }
 
 main() {
