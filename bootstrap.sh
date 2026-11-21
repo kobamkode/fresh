@@ -186,7 +186,7 @@ agents() {
     # --no-approve keeps a project-local .pi/settings.json from being trusted here.
     pi install git:github.com/DietrichGebert/ponytail --no-approve
 
-    echo "==> caveman (pi extension + voice skills + recovery mcp)"
+    echo "==> caveman (pi extension + voice skills)"
     # npm global install is also the update path, and `caveman enable pi` no-ops
     # once the native extension is wired. Both target pi only.
     npm install -g @caveman-ai/cli
@@ -195,9 +195,6 @@ agents() {
     # so fetch the binaries (checksum-verified, no-op once current) first.
     caveman setup --install
     caveman enable pi
-    # pi only knows about the recovery mcp if it is registered; `add` replaces an
-    # existing entry, so re-runs stay idempotent. The extension still does the work.
-    pi mcp add caveman -- "$HOME/.caveman/bin/caveman-mcp"
 
     echo "==> beads (bd)"
     # official installer: verifies release checksum, installs to ~/.local/bin
