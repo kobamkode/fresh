@@ -201,6 +201,17 @@ agents() {
     [ -x "$HOME/.local/bin/bd" ] || \
         curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
 
+    echo "==> beads viewer (bv)"
+    # bv --update is the supported update path, verifies the release checksum, and
+    # no-ops when current. install.sh only runs where bv is missing; pinned to a
+    # reviewed commit because curl|bash runs whatever that URL serves, and it
+    # installs into ~/.local/bin.
+    if [ -x "$HOME/.local/bin/bv" ]; then
+        "$HOME/.local/bin/bv" --update --yes
+    else
+        curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/beads_viewer/9f7d0b703d845f2c050e6fdcd68887414e2b1a3f/install.sh" | bash
+    fi
+
     echo "==> matt pocock skills (engineering + productivity)"
     # ponytail: run every time so skills added to this list below reach machines
     # that already have a lock file; `add` is idempotent. npx -y also skips its own
@@ -220,9 +231,7 @@ agents() {
     echo "==> josjis skill (grill-to-PR chain)"
     # ponytail: josjis only chains the matt pocock skills above, so it installs
     # after them and adds no dependency of its own. Same idempotent `add` path.
-    # The repo is private and this clone carries no token, so it goes over ssh
-    # (the machine key); that needs github.com in ~/.ssh/known_hosts already.
-    npx -y skills@latest add git@github.com:kobamkode/kobamkode-skill.git \
+    npx -y skills@latest add kobamkode/kobamkode-skill \
         --skill josjis \
         -g -a pi -y
 }
