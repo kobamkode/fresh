@@ -9,7 +9,7 @@ alias ct="capture -t"
 alias cl="capture -l"
 alias clw="capture -l -w"
 
-update() { sudo dnf -y upgrade && flatpak -y update; }
+update() { sudo dnf -y upgrade && flatpak -y update && mise upgrade; }
 
 ytraw() {
     if [ $# -lt 1 ]; then
