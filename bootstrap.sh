@@ -49,8 +49,9 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ponytail: stow refuses to overwrite a real file, so drop any pre-existing
 # copy of a config we own before linking. Back these up yourself if you keep
 # local edits in $HOME.
-rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty" \
-    "$HOME/.config/opencode/opencode.json"
+rm -f "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ghostty/config.ghostty"
+# opencode was dropped; clear the symlink older runs left behind.
+rm -f "$HOME/.config/opencode/opencode.json"
 # COSMIC keeps one small file per setting; these directories are tracked
 # whole, so replacing them is safe.
 rm -rf "$HOME/.config/cosmic/com.system76.CosmicComp/v1" \
@@ -102,20 +103,6 @@ fi
 echo "==> capture"
 go install github.com/kobamkode/capture@latest
 
-echo "==> opencode v2"
-# ponytail: the upstream installer always re-downloads and rewrites the
-# binary, so compare versions first and only install when missing or stale.
-# Re-running bootstrap is the update path.
-oc_latest=$(curl -fsSL https://opencode.ai/update/api/latest/cli/npm \
-    | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' | tr -d '\r')
-oc_current=$("$HOME/.opencode/bin/opencode" --version 2>/dev/null || true)
-oc_current="${oc_current##* }"
-oc_current="${oc_current#v}"
-if [ "$oc_latest" != "$oc_current" ]; then
-    # --no-modify-path: PATH lives in the stowed ~/.bashrc.d.
-    curl -fsSL https://opencode.ai/v2/install | bash -s -- --no-modify-path
-fi
-
 echo "==> pi"
 # pi update is the supported update path and no-ops when current; the
 # installer only runs on a machine where pi is missing. The installer has no
@@ -133,17 +120,6 @@ echo "==> beads (bd)"
 # official installer: verifies release checksum, installs to ~/.local/bin
 [ -x "$HOME/.local/bin/bd" ] || \
     curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
-
-echo "==> opencode plugins"
-export PATH="$HOME/.opencode/bin:$PATH"
-# V2: opencode plugin add installs into the global config; skip when the
-# entry already exists so a re-run does not duplicate it.
-grep -q '@dietrichgebert/ponytail' "$HOME/.config/opencode/opencode.json" 2>/dev/null || \
-    opencode plugin add @dietrichgebert/ponytail
-# caveman: upstream still ships the V1 plugin API, which does not run on
-# OpenCode V2 (see https://opencode.ai/v2/docs/build/plugins/migrate-v1).
-# The config entry is removed until upstream ships a V2 entrypoint
-# ({ id, setup }) in src/plugins/opencode/. Re-add "./plugins/caveman" then.
 
 echo "==> matt pocock skills (engineering + productivity)"
 # ponytail: the lock file is written per-skill, so a half-failed add can leave
