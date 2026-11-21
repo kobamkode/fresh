@@ -132,7 +132,14 @@ tools() {
     # layout: first two and next two characters of the crate name.
     dg_latest=$(curl -fsSL https://index.crates.io/de/ps/depsguard \
         | sed -n 's/.*"vers":"\([^"]*\)".*/\1/p' | tail -1)
-    dg_current=$("$HOME/.cargo/bin/depsguard" --version 2>/dev/null | awk '{print $2}')
+    # ponytail: test -x before running depsguard. With set -o pipefail, a
+    # missing binary here makes the pipeline (and so this assignment) exit 127,
+    # which set -e turns into a silent abort of the whole run — case and capture
+    # below would never install.
+    dg_current=
+    if [ -x "$HOME/.cargo/bin/depsguard" ]; then
+        dg_current=$("$HOME/.cargo/bin/depsguard" --version | awk '{print $2}')
+    fi
     if [ -z "$dg_current" ] || [ "$dg_latest" != "$dg_current" ]; then
         cargo install --locked depsguard
     fi
@@ -157,7 +164,20 @@ agents() {
     if command -v pi >/dev/null 2>&1; then
         pi update --no-approve
     else
+        # ponytail: a dead ~/.local/bin/pi link (what an interrupted earlier run
+        # leaves behind) makes the installer install to ~/.pi/agent/bin instead
+        # and exit 0 saying "installed successfully", but PATH still resolves to
+        # the broken link, so every pi step below fails. Clear the link first so
+        # the installer owns that path again, and verify rather than trust.
+        if [ -L "$HOME/.local/bin/pi" ] && [ ! -e "$HOME/.local/bin/pi" ]; then
+            rm -f "$HOME/.local/bin/pi"
+        fi
         curl -fsSL https://pi.dev/install.sh | setsid sh
+        command -v pi >/dev/null 2>&1 || {
+            echo "pi installer finished but pi is not on PATH" >&2
+            echo "check $HOME/.local/bin/pi and $HOME/.pi/agent/bin/pi" >&2
+            exit 1
+        }
     fi
 
     echo "==> ponytail (pi package)"
@@ -166,11 +186,18 @@ agents() {
     # --no-approve keeps a project-local .pi/settings.json from being trusted here.
     pi install git:github.com/DietrichGebert/ponytail --no-approve
 
-    echo "==> caveman (pi extension + voice skills)"
+    echo "==> caveman (pi extension + voice skills + recovery mcp)"
     # npm global install is also the update path, and `caveman enable pi` no-ops
     # once the native extension is wired. Both target pi only.
     npm install -g @caveman-ai/cli
+    # ponytail: `enable pi` exits non-zero while ~/.caveman/bin is empty, which
+    # `set -e` would turn into the whole agents section dying before the skills,
+    # so fetch the binaries (checksum-verified, no-op once current) first.
+    caveman setup --install
     caveman enable pi
+    # pi only knows about the recovery mcp if it is registered; `add` replaces an
+    # existing entry, so re-runs stay idempotent. The extension still does the work.
+    pi mcp add caveman -- "$HOME/.caveman/bin/caveman-mcp"
 
     echo "==> beads (bd)"
     # official installer: verifies release checksum, installs to ~/.local/bin
@@ -196,7 +223,9 @@ agents() {
     echo "==> josjis skill (grill-to-PR chain)"
     # ponytail: josjis only chains the matt pocock skills above, so it installs
     # after them and adds no dependency of its own. Same idempotent `add` path.
-    npx -y skills@latest add kobamkode/kobamkode-skill \
+    # The repo is private and this clone carries no token, so it goes over ssh
+    # (the machine key); that needs github.com in ~/.ssh/known_hosts already.
+    npx -y skills@latest add git@github.com:kobamkode/kobamkode-skill.git \
         --skill josjis \
         -g -a pi -y
 }
