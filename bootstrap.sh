@@ -38,7 +38,7 @@ packages() {
     echo "==> installing packages"
     sudo dnf group install -y development-tools
     sudo dnf install -y \
-        git gh neovim tmux ripgrep fd-find fzf bash-completion ghostty git-delta zoxide stow glances
+        git gh neovim tmux ripgrep fd-find fzf bash-completion ghostty git-delta zoxide stow glances tealdeer
     sudo dnf install -y jetbrainsmono-nerd-font
     fc-cache -f
     # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
