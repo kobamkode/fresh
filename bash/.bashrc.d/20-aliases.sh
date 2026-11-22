@@ -36,7 +36,7 @@ jpi() {
         echo "usage: jpi <capture-id> [extra instruction...]" >&2
         return 2
     fi
-    local id=${1,,} hit content instruction prompt
+    local id=${1,,} hit content instruction prompt status path line reply
     shift
 
     if ! command -v capture >/dev/null 2>&1; then
@@ -71,4 +71,24 @@ jpi() {
     # pi keeps this terminal because nothing here redirects its stdin/stdout.
     prompt="$content"$'\n\n'"$instruction"
     command pi "$prompt"
+    status=$?
+
+    # capture has no 'done' command: a task is closed by flipping its checkbox
+    # in the daily note. pi answering the task is not the same as the task being
+    # done, so ask. Only when pi exited cleanly, and only for an open task.
+    if [ $status -ne 0 ] || ! printf '%s\n' "$hit" | grep -q -- '- \[ \]'; then
+        return $status
+    fi
+    path=${hit%%:*}
+    line=${hit#*:}
+    line=${line%%:*}
+
+    printf 'jpi: %s is a task — mark it done? [y/N] ' "$id" >&2
+    read -r reply || reply=
+    case $reply in
+    # Address by line, but flip only if that line still holds this id, so a note
+    # edited meanwhile is not touched.
+    [yY]*) sed -i "${line}{/$id/ s/\[ \]/[x]/}" "$path" &&
+        echo "jpi: closed $id" >&2 ;;
+    esac
 }
