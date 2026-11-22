@@ -34,7 +34,7 @@ jpi() {
         echo "usage: jpi <capture-id> [extra instruction...]" >&2
         return 2
     fi
-    local id=${1,,} hit instruction prompt
+    local id=${1,,} hit content instruction prompt
     shift
 
     if ! command -v capture >/dev/null 2>&1; then
@@ -59,8 +59,14 @@ jpi() {
         return 1
     fi
 
+    # capture prints "path:line:- [ ] | HH:MM | id | text": keep the text only.
+    content=$(printf '%s\n' "$hit" | sed -E \
+        -e 's/^[^:]*:[0-9]+://' \
+        -e 's/^- (\[[ xX]\] \| )?([0-9]{2}:[0-9]{2} \| )?[0-9a-f]{7} \| //' \
+        -e 's/[[:space:]]+$//')
+
     instruction=${*:-Explain this capture and what it was about.}
     # pi keeps this terminal because nothing here redirects its stdin/stdout.
-    prompt="$hit"$'\n\n'"$instruction"
+    prompt="$content"$'\n\n'"$instruction"
     command pi "$prompt"
 }
