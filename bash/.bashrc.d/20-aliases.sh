@@ -10,7 +10,9 @@ alias cl="capture -l"
 alias co="capture open"
 alias clw="capture -l -w"
 
-update() { sudo dnf -y upgrade && flatpak -y update && mise upgrade; }
+# --no-approve, like bootstrap.sh: otherwise a project-local .pi/settings.json
+# turns the extension update into an approval prompt mid-run.
+update() { sudo dnf -y upgrade && flatpak -y update && mise upgrade && pi update --extensions --no-approve; }
 
 ytraw() {
     if [ $# -lt 1 ]; then
