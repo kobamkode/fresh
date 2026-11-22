@@ -4,9 +4,10 @@ alias t="tmux"
 alias ta="tmux a"
 alias lg="lazygit"
 alias ld="lazydocker"
-alias c="capture"
-alias ct="capture -t"
+alias c="capture -t"
+alias cn="capture"
 alias cl="capture -l"
+alias co="capture open"
 alias clw="capture -l -w"
 
 update() { sudo dnf -y upgrade && flatpak -y update && mise upgrade; }
@@ -24,4 +25,42 @@ ytraw() {
     fi
     mkdir -p "$(dirname -- "$dest")"
     summarize "$url" --extract --format md >"$dest" && echo "wrote $dest"
+}
+
+# jpi <capture-id> [extra instruction...] — find a capture, then open it in pi.
+# A function, not a script, so pi inherits this terminal and stays interactive.
+jpi() {
+    if [ $# -lt 1 ] || [ -z "$1" ]; then
+        echo "usage: jpi <capture-id> [extra instruction...]" >&2
+        return 2
+    fi
+    local id=${1,,} hit instruction prompt
+    shift
+
+    if ! command -v capture >/dev/null 2>&1; then
+        echo "jpi: 'capture' not found on PATH" >&2
+        return 1
+    fi
+    if ! command -v pi >/dev/null 2>&1; then
+        echo "jpi: 'pi' not found on PATH" >&2
+        return 1
+    fi
+
+    # Older binaries treat 'find <id>' as text to append, which would write to
+    # the journal. Refuse before that happens.
+    if ! capture --help 2>/dev/null | grep -q 'find <id>'; then
+        echo "jpi: capture is too old for 'find'; update with: go install github.com/kobamkode/capture@latest" >&2
+        return 1
+    fi
+
+    hit=$(capture find "$id") || return $?
+    if [ -z "$hit" ]; then
+        echo "jpi: no capture $id" >&2
+        return 1
+    fi
+
+    instruction=${*:-Explain this capture and what it was about.}
+    # pi keeps this terminal because nothing here redirects its stdin/stdout.
+    prompt="$hit"$'\n\n'"$instruction"
+    command pi "$prompt"
 }
