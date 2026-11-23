@@ -59,3 +59,6 @@ bash -n bootstrap.sh bash/.bashrc.d/*.sh
   `20-aliases` (aliases, `update`, `ytraw`), `30-tools` (mise/starship/zoxide,
   tmux auto-attach).
 - `config/{ghostty,tmux,cosmic}/` — stowed to `~/.config`.
+- `pi/.pi/agent/settings.json` — stowed to `~/.pi/agent/settings.json`; the only
+  tracked pi file. pi writes it in place, so the link survives; `auth.json`,
+  `sessions/` and the `install/`, `npm/`, `git/` trees stay untracked.

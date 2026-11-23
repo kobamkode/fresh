@@ -97,11 +97,15 @@ dotfiles() {
         case $rel in
         config/*) target="$HOME/.config/${rel#config/}" ;;
         bash/*) target="$HOME/${rel#bash/}" ;;
+        pi/*) target="$HOME/.pi/${rel#pi/}" ;;
         esac
         rm -f "$target"
-    done < <(git -C "$DOTFILES_DIR" ls-files config bash)
+    done < <(git -C "$DOTFILES_DIR" ls-files config bash pi)
     stow --no-folding -d "$DOTFILES_DIR" -t "$HOME/.config" config
     stow --no-folding -d "$DOTFILES_DIR" -t "$HOME" bash
+    # ponytail: only settings.json is tracked; auth.json, sessions and the
+    # install/npm/git trees are runtime state and stay out of the repo.
+    stow --no-folding -d "$DOTFILES_DIR" -t "$HOME" pi
 
     echo "==> neovim config"
     if [ -d "$HOME/.config/nvim/.git" ]; then

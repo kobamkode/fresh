@@ -1,0 +1,13 @@
+{
+  "packages": [
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:context-mode",
+    "npm:@tintinweb/pi-subagents"
+  ],
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4.1-flash",
+  "enableSkillCommands": true,
+  "quietStartup": true,
+  "enableInstallTelemetry": false,
+  "hideThinkingBlock": true
+}
