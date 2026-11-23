@@ -9,7 +9,7 @@ set -euo pipefail
 #   all       everything, in order (new machine)
 #   packages  dnf/copr/flatpak installs, docker, login shell
 #   dotfiles  stow links, neovim config
-#   tools     mise tools, depsguard, capture, summarize
+#   tools     mise tools, depsguard, capture, summarize, hunk
 #   agents    pi and its packages, beads, skills
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +38,7 @@ packages() {
     echo "==> installing packages"
     sudo dnf group install -y development-tools
     sudo dnf install -y \
-        git gh neovim tmux ripgrep fd-find fzf bash-completion ghostty git-delta zoxide stow glances tealdeer
+        git gh neovim tmux ripgrep fd-find fzf bash-completion ghostty zoxide stow glances tealdeer
     sudo dnf install -y jetbrainsmono-nerd-font
     fc-cache -f
     # ponytail: DBeaver has no official Fedora RPM repo, so `dnf upgrade` never
@@ -151,6 +151,11 @@ tools() {
     # ytraw in .bashrc.d/20-aliases.sh shells out to summarize; npm global is the
     # upstream install and update path, and the prebuilt bin lands on the mise shim.
     npm install -g @steipete/summarize
+
+    echo "==> hunk (diff review)"
+    # npm global is the upstream install path and the bin lands on the mise shim;
+    # re-running npm install -g is also how it updates.
+    npm install -g hunkdiff
 }
 
 agents() {
@@ -186,15 +191,14 @@ agents() {
     # --no-approve keeps a project-local .pi/settings.json from being trusted here.
     pi install git:github.com/DietrichGebert/ponytail --no-approve
 
-    echo "==> caveman (pi extension + voice skills)"
-    # npm global install is also the update path, and `caveman enable pi` no-ops
-    # once the native extension is wired. Both target pi only.
-    npm install -g @caveman-ai/cli
-    # ponytail: `enable pi` exits non-zero while ~/.caveman/bin is empty, which
-    # `set -e` would turn into the whole agents section dying before the skills,
-    # so fetch the binaries (checksum-verified, no-op once current) first.
-    caveman setup --install
-    caveman enable pi
+    echo "==> context-mode (pi extension)"
+    # Same pi-package path as ponytail: `pi install` adds it to settings.json and
+    # refreshes on re-run, and `pi update --extensions` is the plain update path.
+    pi install npm:context-mode --no-approve
+
+    echo "==> subagents (pi extension)"
+    # Same pi-package path again; needs pi 1.1.0+ (its peerDependencies say so).
+    pi install npm:@tintinweb/pi-subagents --no-approve
 
     echo "==> beads (bd)"
     # official installer: verifies release checksum, installs to ~/.local/bin

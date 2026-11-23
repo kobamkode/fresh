@@ -13,9 +13,9 @@ Fedora-only (dnf, copr, flatpak); no other distro is supported or tested.
 
 Sections: `packages` (dnf/copr/flatpak, docker, tailscale, login shell),
 `dotfiles` (git identity, stow, nvim), `tools` (mise, depsguard, capture,
-summarize), `agents` (pi, ponytail, caveman, beads, bv, skills). A section assumes
-the earlier ones ran on this machine at least once — `agents` needs the node
-that `tools` installs.
+summarize, hunk), `agents` (pi, ponytail, context-mode, beads, bv, skills). A
+section assumes the earlier ones ran on this machine at least once — `agents`
+needs the node that `tools` installs.
 
 Check shell edits before running anything:
 
