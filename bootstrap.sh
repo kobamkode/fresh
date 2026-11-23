@@ -97,7 +97,7 @@ dotfiles() {
         case $rel in
         config/*) target="$HOME/.config/${rel#config/}" ;;
         bash/*) target="$HOME/${rel#bash/}" ;;
-        pi/*) target="$HOME/.pi/${rel#pi/}" ;;
+        pi/*) target="$HOME/${rel#pi/}" ;;
         esac
         rm -f "$target"
     done < <(git -C "$DOTFILES_DIR" ls-files config bash pi)
