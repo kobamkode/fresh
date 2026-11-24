@@ -9,7 +9,7 @@ set -euo pipefail
 #   all       everything, in order (new machine)
 #   packages  dnf/copr/flatpak installs, docker, login shell
 #   dotfiles  stow links, neovim config
-#   tools     mise tools, depsguard, capture, summarize, hunk
+#   tools     mise tools (incl. npm: hunk, summarize), depsguard, capture
 #   agents    pi and its packages, beads, skills
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -125,8 +125,15 @@ tools() {
     # ponytail: mise.run is upstream's recommended Linux install and keeps the
     # binary when it is the same release or newer, so re-runs are a no-op.
     curl -fsSL https://mise.run | sh
-    # node at 24: summarize (ytraw's dependency) requires >=24; the rest float.
-    mise use --global node@24 go hugo-extended bun rust starship@latest lazygit lazydocker
+    # node pinned at 26 (summarize needs >=24); the rest float.
+    mise use --global node@26 go hugo-extended bun rust starship@latest lazygit lazydocker
+    # npm CLIs are mise tools (npm: backend), not `npm install -g`: a global
+    # install lands inside whichever node version was active, so the next node
+    # bump leaves a shim pointing at a version without the package ("hunk is
+    # not provided by the active node@26"). As a mise tool the shim belongs to
+    # the package itself, and `mise upgrade` below is the update path. Node must
+    # already be installed, hence the line above.
+    mise use --global 'npm:hunkdiff@latest' 'npm:@steipete/summarize@latest'
     mise upgrade
 
     echo "==> depsguard"
@@ -150,16 +157,6 @@ tools() {
 
     echo "==> capture"
     go install github.com/kobamkode/capture@latest
-
-    echo "==> summarize (ytraw)"
-    # ytraw in .bashrc.d/20-aliases.sh shells out to summarize; npm global is the
-    # upstream install and update path, and the prebuilt bin lands on the mise shim.
-    npm install -g @steipete/summarize
-
-    echo "==> hunk (diff review)"
-    # npm global is the upstream install path and the bin lands on the mise shim;
-    # re-running npm install -g is also how it updates.
-    npm install -g hunkdiff
 }
 
 agents() {
