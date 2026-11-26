@@ -223,10 +223,12 @@ agents() {
         -g -a pi -y
 
     echo "==> josjis skill (grill-to-PR chain)"
-    # ponytail: josjis only chains the matt pocock skills above, so it installs
-    # after them and adds no dependency of its own. Same idempotent `add` path.
+    # ponytail: josjis chains the matt pocock skills above by name (~/.agents/skills),
+    # so it installs after them. setup-josjis is the phase-2 gate that configures the
+    # issue tracker, and a missing one makes /josjis demand a command that isn't
+    # installed. Same idempotent `add` path for both.
     npx -y skills@latest add kobamkode/kobamkode-skill \
-        --skill josjis \
+        --skill josjis --skill setup-josjis \
         -g -a pi -y
 }
 
