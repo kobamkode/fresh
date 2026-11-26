@@ -10,7 +10,7 @@ set -euo pipefail
 #   packages  dnf/copr/flatpak installs, docker, login shell
 #   dotfiles  stow links, neovim config
 #   tools     mise tools (incl. npm: hunk, summarize), depsguard, capture
-#   agents    pi and its packages, beads, skills
+#   agents    pi, beads, skills (pi packages come from the stowed settings.json)
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # mise shims carry npm/cargo/go installed below; ~/go/bin carries `go install`
@@ -186,20 +186,9 @@ agents() {
         }
     fi
 
-    echo "==> ponytail (pi package)"
-    # ponytail ships a pi extension plus its six skills, and `pi install` is also
-    # the update path: re-running refreshes the clone and no-ops when current.
-    # --no-approve keeps a project-local .pi/settings.json from being trusted here.
-    pi install git:github.com/DietrichGebert/ponytail --no-approve
-
-    echo "==> context-mode (pi extension)"
-    # Same pi-package path as ponytail: `pi install` adds it to settings.json and
-    # refreshes on re-run, and `pi update --extensions` is the plain update path.
-    pi install npm:context-mode --no-approve
-
-    echo "==> subagents (pi extension)"
-    # Same pi-package path again; needs pi 1.1.0+ (its peerDependencies say so).
-    pi install npm:@tintinweb/pi-subagents --no-approve
+    # pi packages (ponytail, context-mode, subagents) are not installed here:
+    # the stowed settings.json lists them in "packages" and pi installs what is
+    # missing on startup.
 
     echo "==> beads (bd)"
     # official installer: verifies release checksum, installs to ~/.local/bin
@@ -257,7 +246,7 @@ main() {
         packages
         dotfiles
         tools
-        agents
+        # :agents
         echo "done. re-login for bash and the docker group to take effect."
         ;;
     packages | dotfiles | tools | agents) "$1" ;;
